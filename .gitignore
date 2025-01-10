@@ -1,0 +1,38 @@
+# Virtual environment directories (each microservice has its own)
+venv/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*$py.class
+
+# Local environment variables and config files
+.env
+*.env
+config.ini
+settings.json
+
+# Logs and databases
+logs/
+*.log
+*.sqlite3
+*.db
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# IDE/editor-specific files
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
