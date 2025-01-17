@@ -5,7 +5,9 @@ from crud.bid_time import create_bid, get_bid_time, get_bid_time_by_product
 from schemas.bid_time import CreateBidTime, BidTimeSchema
 from datetime import datetime,time
 from fastapi.background import BackgroundTasks
-import time as time_module
+import time
+from services.requests import fetch_data
+
 
 from crud.bid import get_highset_bid
 from crud.wins import Create_Wins
@@ -35,7 +37,7 @@ async def create_bid_time(product_id: int, hour:int,minute:int,second:int,backgr
     'Content-Type': 'application/json'
     }
     
-    response = requests.put(f'http://localhost:8002/api/products/open/{product_id}', headers=headers)
+    response = await fetch_data(f'api/products/update_status/{product_id}', service_name="product-service", method="put", headers=headers, payload={"is_closed": False})
     
     # print(response.json())
 
@@ -55,7 +57,8 @@ async def create_bid_time(product_id: int, hour:int,minute:int,second:int,backgr
     else:
         print("bid time not created")
     
-    # response1 = requests.put(f'http://localhost:8002/api/products/close/{product_id}',headers=headers)
+    
+    await fetch_data(f'api/products/update_status/{product_id}', service_name="product-service", method="put", headers=headers, payload={"is_closed": True})
 
     
     return created

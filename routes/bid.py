@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from config.db import SessionLocal
 from fastapi import APIRouter, Depends , HTTPException, Body, WebSocket, WebSocketDisconnect
-import requests
 
 from crud.bid import Create_Bid, Get_Bid, get_Bid_By_Id, get_by_product_id
 from schemas.bid import CreateBid,BidSchema
@@ -36,10 +35,10 @@ async def startup_event():
     asyncio.create_task(start_kafka_consumer())
 
 @BidRouter.post('/api/bid/add', response_model = BidSchema)
-async def create_bid(product_id: int,amount: float , db: Session = Depends(get_db)):
+async def create_bid(token: str, product_id: int,amount: float , db: Session = Depends(get_db)):
     
     headers = {
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKb2huIiwiZXhwIjoxNzI5MzQyNzU5fQ.gV_0dQxWtg-auBQvjQfwaA1jUGCWDa2IMnfZl-fI9rg',
+    'Authorization': 'Bearer '+ token,
     'Content-Type': 'application/json'
     }
     
@@ -47,23 +46,22 @@ async def create_bid(product_id: int,amount: float , db: Session = Depends(get_d
     'Content-Type': 'application/json'
     }
     
-    # user_response = requests.get(f'http://localhost:8001/api/user/me', headers=headers)
+    # product = await fetch_data(f'http://localhost:8002/api/products/{product_id}', headers=headers2)
     # product_response = requests.get(f'http://localhost:8002/api/products/{product_id}', headers=headers2)
     
-    # bidder = await fetch_data(f'http://localhost:8001/api/user/me', headers=headers)
-    product = await fetch_data(f'http://localhost:8002/api/products/{product_id}', headers=headers2)
-    bidder = random.randint(1,10)
+    product = await fetch_data(f'api/products/{product_id}', service_name="product-service", method='get', headers=headers2)
+    bidder = await fetch_data(f'api/user/me',service_name="user-service", method='get', headers=headers)
 
-    
-    # bidder = user_response.json()
-    # product = product_response.json()
+
+    # bidder = random.randint(1,10)
+
     
     print(product)
     product_price = product['disposal_price']
     
     if amount < product_price:
         raise HTTPException(status_code=400, detail="Bid amount must be greater than or equal to the product price.")
-    new_bid = CreateBid(amount=amount, bidder_id=bidder, product_id=product_id)
+    new_bid = CreateBid(amount=amount, bidder_id=bidder['id'], product_id=product_id)
     
     # sending kafka message
     
